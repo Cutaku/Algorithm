@@ -27,8 +27,8 @@ public class 부분수열의합_1208 {
         left = new ArrayList<>();
         right = new ArrayList<>();
 
-        dfs(0, 0, l, 0, true);
-        dfs(l, l, n, 0, false);
+        dfs(0, l, 0, true);
+        dfs(l, n, 0, false);
 
         Collections.sort(left);
         Collections.sort(right);
@@ -69,7 +69,7 @@ public class 부분수열의합_1208 {
         System.out.println(count);
     }
 
-    static void dfs(int start, int now, int end, int sum, boolean isLeft) {
+    static void dfs(int now, int end, int sum, boolean isLeft) {
 
         if (now == end) {
             if (isLeft) left.add(sum);
@@ -78,7 +78,7 @@ public class 부분수열의합_1208 {
             return;
         }
 
-        dfs(start, now + 1, end, sum, isLeft);
-        dfs(start, now + 1, end, sum + arr[now], isLeft);
+        dfs(now + 1, end, sum, isLeft);
+        dfs(now + 1, end, sum + arr[now], isLeft);
     }
 }
