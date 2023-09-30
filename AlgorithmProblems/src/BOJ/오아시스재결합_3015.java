@@ -15,24 +15,28 @@ public class 오아시스재결합_3015 {
         int[] heights = new int[n + 1];
         for (int i = 0; i < n; i++) heights[i] = Integer.parseInt(br.readLine());
 
-        Stack<Integer> stack = new Stack<>();
+        Stack<int[]> stack = new Stack<>();
 
         long sum = 0;
 
         for (int i = 0; i < n; i++) {
-            while (!stack.isEmpty() && heights[stack.peek()] < heights[i]) {
-                sum += i - stack.pop();
+            int height = heights[i];
+
+            int[] last = new int[]{0, 0};
+
+            while (!stack.isEmpty() && stack.peek()[0] <= height) {
+                last = stack.pop();
+                sum += last[1];
             }
 
-            stack.add(i);
-        }
+            if (!stack.isEmpty()) sum++;
 
-        int s = stack.size();
-
-        int[] left = new int[s];
-
-        for (int i = s - 1; i >= 0; i--) {
-            left[i] = stack.pop();
+            if (last[0] == height) {
+                last[1]++;
+                stack.add(last);
+            } else {
+                stack.add(new int[]{height, 1});
+            }
         }
 
         System.out.println(sum);
