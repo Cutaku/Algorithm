@@ -1,4 +1,4 @@
-package BOJ;
+package SWExpertAcademy;
 
 import java.io.*;
 import java.util.Arrays;
