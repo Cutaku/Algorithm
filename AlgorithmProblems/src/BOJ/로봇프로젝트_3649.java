@@ -10,38 +10,38 @@ public class 로봇프로젝트_3649 {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        try {
-            while (true) {
-                int x = Integer.parseInt(br.readLine());
-                x *= 10000000;
+        String input;
 
-                int n = Integer.parseInt(br.readLine());
+        while ((input = br.readLine()) != null) {
+            int x = Integer.parseInt(input) * 10000000;
 
-                int[] legos = new int[n];
+            int n = Integer.parseInt(br.readLine());
 
-                for (int i = 0; i < n; i++) {
-                    legos[i] = Integer.parseInt(br.readLine());
-                }
+            int[] legos = new int[n];
 
-                Arrays.sort(legos);
-
-                int s = 0;
-                int e = n - 1;
-
-                while (s < e) {
-                    if (legos[s] + legos[e] > x) {
-                        e--;
-                    } else if (legos[s] + legos[e] < x) {
-                        s++;
-                    } else {
-                        System.out.println("yes " + legos[s] + " " + legos[e]);
-                        break;
-                    }
-                }
-
-                if (s == e) System.out.println("danger");
+            for (int i = 0; i < n; i++) {
+                legos[i] = Integer.parseInt(br.readLine());
             }
-        } catch (Exception e){
+
+            Arrays.sort(legos);
+
+            int s = 0;
+            int e = Math.max(n - 1, 0);
+
+            while (s < e) {
+                if (legos[s] + legos[e] > x) {
+                    e--;
+                } else if (legos[s] + legos[e] < x) {
+                    s++;
+                } else {
+                    System.out.printf("yes %d %d\n", legos[s], legos[e]);
+                    break;
+                }
+            }
+
+            if (s == e) System.out.println("danger");
+
+            input = null;
         }
     }
 }
