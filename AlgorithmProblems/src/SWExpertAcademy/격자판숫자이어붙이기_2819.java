@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class 요리사_4012 {
+public class 격자판숫자이어붙이기_2819 {
     static int[][] board;
     static int[][] D = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
     static Set<Integer> set;
