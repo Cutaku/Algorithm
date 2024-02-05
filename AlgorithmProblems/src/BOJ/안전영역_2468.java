@@ -1,60 +1,63 @@
 package BOJ;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.io.*;
+import java.util.*;
 
 public class 안전영역_2468 {
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int N = Integer.parseInt(br.readLine());
-        int[][] Region = new int[N][N];
-        for (int i = 0; i < N; i++) Region[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+    static int n;
+    static int[][] heights;
+    static int[][] D = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
-        int safe = 1, max = 1;
-        int h = 1;
+    public static void main(String[] args) throws IOException {
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        n = Integer.parseInt(br.readLine());
+
+        heights = new int[n][];
+        for (int i = 0; i < n; i++) {
+            heights[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        }
+
+        int safe = 1;
+        int h = 0;
+        int max = 1;
 
         while (safe > 0) {
-            safe = countSafeZone(h++, Region);
+            safe = findSafeArea(++h);
             max = Math.max(max, safe);
         }
 
         System.out.println(max);
     }
 
-    static int countSafeZone(int h, int[][] Region) {
+    static int findSafeArea(int h) {
+
+        boolean[][] checked = new boolean[n][n];
+
         int count = 0;
-        int N = Region.length;
-        boolean[][] Checked = new boolean[N][N];
 
-        Queue<int[]> q1 = new LinkedList<>(), q2 = new LinkedList<>();
-        int[][] move = {{0,1},{1,0},{0,-1},{-1,0}};
+        Queue<int[]> q = new ArrayDeque<>();
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (Region[i][j] <= h) Checked[i][j] = true;
-                else if (!Checked[i][j]) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (isSafe(h, i, j) && !checked[i][j]) {
                     count++;
-                    q1.add(new int[] {i,j});
-                    Checked[i][j] = true;
 
-                    while (!q1.isEmpty()) {
-                        int[] now = q1.poll();
+                    q.add(new int[]{i, j});
 
-                        for (int[] m : move) {
-                            int i_ = now[0] + m[0], j_ = now[1] + m[1];
-                            if (0 <= i_ && 0 <= j_ && i_ < N && j_ < N && !Checked[i_][j_] && Region[i_][j_] > h) {
-                                q2.add(new int[] {i_,j_});
-                                Checked[i_][j_] = true;
-                            }
-                        }
+                    while (!q.isEmpty()) {
+                        int[] now = q.poll();
 
-                        if (q1.isEmpty()) {
-                            q1 = q2;
-                            q2 = new LinkedList<>();
+                        for (int[] d : D) {
+                            int x = now[0] + d[0];
+                            int y = now[1] + d[1];
+
+                            if (x < 0 || y < 0 || x >= n || y >= n || !isSafe(h, x, y) || checked[x][y]) continue;
+
+                            checked[x][y] = true;
+
+                            q.add(new int[]{x, y});
                         }
                     }
                 }
@@ -62,5 +65,9 @@ public class 안전영역_2468 {
         }
 
         return count;
+    }
+
+    static boolean isSafe(int h, int i, int j) {
+        return heights[i][j] > h;
     }
 }
