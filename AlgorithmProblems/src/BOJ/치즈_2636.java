@@ -21,9 +21,8 @@ public class 치즈_2636 {
         Queue<Integer> q1 = new ArrayDeque<>();
         Queue<Integer> q2 = new ArrayDeque<>();
 
-        Set<Integer> v = new HashSet<>();
-
         q1.add(0);
+        board[0][0] = 2;
 
         int count = -1;
         int last = 0;
@@ -40,10 +39,12 @@ public class 치즈_2636 {
                 int y = c + d[1];
                 int m = x * w + y;
 
-                if (x < 0 || y < 0 || x >= h || y >= w || !v.add(m)) continue;
+                if (x < 0 || y < 0 || x >= h || y >= w || board[x][y] == 2) continue;
 
                 if (board[x][y] == 1) q2.add(m);
                 else q1.add(m);
+
+                board[x][y] = 2;
             }
 
             if (q1.isEmpty()) {

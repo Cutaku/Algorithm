@@ -3,8 +3,8 @@ package BOJ;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Queue;
 
 public class 치즈_2638 {
@@ -12,88 +12,55 @@ public class 치즈_2638 {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int[] nm = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-        int n = nm[0], m = nm[1];
+        int[] hw = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        int h = hw[0], w = hw[1];
 
-        int[][] board = new int[n][];
-        for (int i = 0; i < n; i++) board[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        int[][] board = new int[h][];
+        for (int i = 0; i < h; i++) {
+            board[i] = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        }
+        int[][] expose = new int[h][w];
 
-        Queue<int[]> q = new LinkedList<>();
-        q.add(new int[]{0, 0});
+        Queue<Integer> q1 = new ArrayDeque<>();
+        Queue<Integer> q2 = new ArrayDeque<>();
 
+        q1.add(0);
         board[0][0] = 2;
 
-        extendAir(board, q);
-        findMeltingCheese(board, q);
+        int count = -1;
 
-        int time = 0;
+        int[][] D = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
-        while (!q.isEmpty()) {
-            time++;
-            extendAir(board, q);
-            findMeltingCheese(board, q);
-        }
-
-        System.out.println(time);
-    }
-
-    public static void extendAir(int[][] board, Queue<int[]> q) {
-
-        int n = board.length;
-        int m = board[0].length;
-
-        int[][] D = new int[][]{{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-
-        while (!q.isEmpty()) {
-            int[] now = q.poll();
+        while (!q1.isEmpty()) {
+            int n = q1.poll();
+            int r = n / w;
+            int c = n % w;
 
             for (int[] d : D) {
-                int x = now[0] + d[0];
-                int y = now[1] + d[1];
+                int x = r + d[0];
+                int y = c + d[1];
+                int m = x * w + y;
 
-                if (x < 0 || y < 0 || x >= n || y >= m || board[x][y] > 0) continue;
+                if (x < 0 || y < 0 || x >= h || y >= w || board[x][y] == 2) continue;
 
-                board[x][y] = 2;
-
-                q.add(new int[]{x, y});
+                if (board[x][y] == 0) {
+                    q1.add(m);
+                    board[x][y] = 2;
+                } else if (board[x][y] == 1 && ++expose[x][y] > 1) {
+                    q2.add(m);
+                    board[x][y] = 2;
+                }
             }
-        }
-    }
 
-    public static int countAir(int[][] board, int i, int j) {
+            if (q1.isEmpty()) {
+                Queue<Integer> t = q1;
+                q1 = q2;
+                q2 = t;
 
-        int n = board.length;
-        int m = board[0].length;
-
-        int[][] D = new int[][]{{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
-
-        int count = 0;
-
-        for (int[] d : D) {
-            int x = i + d[0];
-            int y = j + d[1];
-
-            if (x < 0 || y < 0 || x >= n || y >= m) continue;
-
-            if (board[x][y] == 2) count++;
-        }
-
-        return count;
-    }
-
-    public static void findMeltingCheese(int[][] board, Queue<int[]> q) {
-
-        int n = board.length;
-        int m = board[0].length;
-
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (board[i][j] == 1 && countAir(board, i, j) > 1)  q.add(new int[]{i, j});
+                count++;
             }
         }
 
-        for (int[] point : q) {
-            board[point[0]][point[1]] = 2;
-        }
+        System.out.println(count);
     }
 }
