@@ -4,82 +4,81 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class 스도쿠_2239 {
-    static int[][] board;
-    static List<int[]> blank;
-    static boolean[][] hori;
-    static boolean[][] vert;
-    static boolean[][][] sect;
-    static boolean fin;
+    static int[] row = new int[9];
+    static int[] col = new int[9];
+    static int[][] sec = new int[3][3];
+    static int[][] sudoku = new int[9][9];
+    static List<int[]> zeros = new ArrayList<>();
+    static int l;
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
 
-        board = new int[9][];
-        for (int i = 0; i < 9; i++) board[i] = Arrays.stream(br.readLine().split("")).mapToInt(Integer::parseInt).toArray();
+        for (int i = 0; i < 9; i++) {
+            String line = br.readLine();
 
-        blank = new ArrayList<>();
-        hori = new boolean[9][10];
-        vert = new boolean[9][10];
-        sect = new boolean[3][3][10];
+            for (int j = 0; j < 9; j++) {
+                sudoku[i][j] = line.charAt(j) - '1';
+
+                if (sudoku[i][j] > -1) {
+                    row[i] |= 1 << sudoku[i][j];
+                    col[j] |= 1 << sudoku[i][j];
+                    sec[i / 3][j / 3] |= 1 << sudoku[i][j];
+                } else {
+                    zeros.add(new int[]{i, j});
+                }
+            }
+        }
+
+        l = zeros.size();
+
+        dfs(0);
 
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                if (board[i][j] > 0) {
-                    hori[i][board[i][j]] = true;
-                    vert[j][board[i][j]] = true;
-                    sect[i / 3][j / 3][board[i][j]] = true;
-                } else {
-                    blank.add(new int[]{i, j});
-                }
+                sb.append(sudoku[i][j] + 1);
             }
+
+            sb.append("\n");
         }
 
-        fin = false;
-
-        dfs(0);
+        System.out.println(sb);
     }
 
-    public static void dfs(int n) {
+    static boolean dfs(int d) {
 
-        if (fin) return;
+        if (d == l) return true;
 
-        if (n == blank.size()) {
-            fin = true;
-            for (int i = 0; i < 9; i++) {
-                for (int j = 0; j < 9; j++) {
-                    System.out.print(board[i][j]);
-                }
+        int[] rc = zeros.get(d);
+        int r = rc[0], c = rc[1];
 
-                System.out.println();
-            }
+        int able = ((1 << 9) - 1) & ~(row[r] | col[c] | sec[r / 3][c / 3]);
 
-            return;
+        int i = 0;
+
+        while (able > 0) {
+            int p = able & -able;
+            able -= p;
+
+            while (p > (1 << i)) i++;
+            sudoku[r][c] = i;
+
+            row[r] |= p;
+            col[c] |= p;
+            sec[r / 3][c / 3] |= p;
+
+            if (dfs(d + 1)) return true;
+
+            row[r] &= ~p;
+            col[c] &= ~p;
+            sec[r / 3][c / 3] &= ~p;
         }
 
-        int[] now = blank.get(n);
-        int x = now[0], y = now[1];
-
-        for (int i = 1; i < 10; i++) {
-            if (fin) return;
-
-            if (hori[x][i] || vert[y][i] || sect[x / 3][y / 3][i]) continue;
-
-            board[x][y] = i;
-            hori[x][i] = true;
-            vert[y][i] = true;
-            sect[x / 3][y / 3][i] = true;
-
-            dfs(n + 1);
-
-            board[x][y] = 0;
-            hori[x][i] = false;
-            vert[y][i] = false;
-            sect[x / 3][y / 3][i] = false;
-        }
+        return false;
     }
 }
