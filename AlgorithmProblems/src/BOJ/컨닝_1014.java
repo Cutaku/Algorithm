@@ -4,98 +4,85 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
 public class 컨닝_1014 {
     public static void main(String[] args) throws IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        boolean[][] bits = new boolean[1024][10];
-
-        for (int i = 0; i < 1024; i++) {
-            int n = i;
-
-            for (int j = 0; j < 10; j++) {
-                if (n == 0) continue;
-
-                bits[i][j] = n % 2 == 1;
-                n /= 2;
-            }
-        }
+        StringBuilder sb = new StringBuilder();
+        StringTokenizer st;
 
         List<Integer> list = new ArrayList<>();
+        list.add(0);
 
-        for (int i = 0; i < 1024; i++) {
-            if (check1(bits[i])) list.add(i);
-        }
+        for (int i = 0; i < 10; i++) {
+            List<Integer> temp = new ArrayList<>();
 
-        int l = list.size();
+            for (int j : list) {
+                temp.add(j << 1);
 
-        boolean[][] fb = new boolean[l][l];
-
-        for (int i = 0; i < l - 1; i++) {
-            for (int j = i + 1; j < l; j++) {
-                if (check2(bits[list.get(i)], bits[list.get(j)])) {
-                    fb[i][j] = true;
-                    fb[j][i] = true;
-                }
+                if ((j & 1) == 0) temp.add((j << 1) + 1);
             }
+
+            list = temp;
         }
 
-        int[] count = new int[1024] ;
+        int s = list.size();
 
-        for (int i : list) {
-            for (int j = 0; j < 10; j++) {
-                if (bits[i][j]) count[i]++;
-            }
-        }
+        int[] bicCount = new int[s];
+        for (int i = 0; i < s; i++) bicCount[i] = Integer.bitCount(list.get(i));
 
         int T = Integer.parseInt(br.readLine());
 
-        for (int tc = 0; tc < T; tc++) {
-            int[] nm = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-            int n = nm[0], m = nm[1];
-            int s = 1 << m;
+        while (T-- > 0) {
+            st = new StringTokenizer(br.readLine());
+            int n = Integer.parseInt(st.nextToken()), m = Integer.parseInt(st.nextToken());
+            int l = 1 << m;
 
-            char[][] classroom = new char[n][];
-            for (int i = 0; i < n; i++) classroom[i] = br.readLine().toCharArray();
+            int[] classroom = new int[n];
 
-            int[] dp = Arrays.copyOf(count, s);
+            for (int i = 0; i < n; i++) {
+                String line = br.readLine();
 
-            for (int i = 0; i < s; i++) {
+                int b = 0;
+
                 for (int j = 0; j < m; j++) {
-                    if (bits[i][j] && classroom[0][j] == 'x') {
-                        dp[i] = 0;
-                        break;
-                    }
+                    b <<= 1;
+                    if (line.charAt(j) == 'x') b++;
                 }
+
+                classroom[i] = b;
             }
 
-            for (int row = 0; row < n - 1; row++) {
+            int[] dp = new int[s];
+
+            for (int i = 0; i < s; i++) {
+                int b = list.get(i);
+
+                if (b >= l) break;
+                if ((b & classroom[0]) > 0) continue;
+
+                dp[i] = bicCount[i];
+            }
+
+            for (int row = 1; row < n; row++) {
                 int[] temp = new int[s];
 
-                for (int i : list) {
-                    if (i >= s) break;
+                for (int i = 0; i < s; i++) {
+                    int b1 = list.get(i);
 
-                    for (int j : list) {
-                        if (j >= s) break;
+                    if (b1 >= l) break;
 
-                        boolean b = false;
+                    for (int j = 0; j < s; j++) {
+                        int b2 = list.get(j);
 
-                        for (int k = 0; k < m; k++) {
-                            if (bits[j][k] && classroom[row + 1][k] == 'x') {
-                                b = true;
-                                break;
-                            }
-                        }
+                        if (b2 >= l) break;
 
-                        if (b) continue;
+                        if ((b2 & ((b1 << 1) | (b1 >> 1) | classroom[row])) > 0) continue;
 
-                        if (check2(bits[i], bits[j])) {
-                            temp[j] = Math.max(temp[j], dp[i] + count[j]);
-                        }
+                        temp[j] = Math.max(temp[j], dp[i] + bicCount[j]);
                     }
                 }
 
@@ -104,30 +91,17 @@ public class 컨닝_1014 {
 
             int max = 0;
 
-            for (int d : dp) max = Math.max(max, d);
+            for (int i = 0; i < s; i++) {
+                int b = list.get(i);
 
-            System.out.println(max);
-        }
-    }
+                if (b >= l) break;
 
-    static boolean check1(boolean[] a) {
+                max = Math.max(max, dp[i]);
+            }
 
-        for (int i = 0; i < 9; i++) {
-            if (a[i] && a[i + 1]) return false;
-        }
-
-        return true;
-    }
-
-    static boolean check2(boolean[] a, boolean[] b) {
-
-        for (int i = 0; i < 10; i++) {
-            if (!b[i]) continue;
-
-            if (i > 0 && a[i - 1]) return false;
-            if (i < 9 && a[i + 1]) return false;
+            sb.append(max).append("\n");
         }
 
-        return true;
+        System.out.println(sb);
     }
 }
