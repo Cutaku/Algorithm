@@ -7,102 +7,83 @@ import java.util.*;
 
 public class 게리맨더링_17471 {
     static int n;
-    static int[] populations;
+    static Map<Integer, Integer> populations;
     static List<Integer>[] adj;
 
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         n = Integer.parseInt(br.readLine());
 
-        populations = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        populations = new HashMap<>();
 
-        adj = new List[n + 1];
-
-        for (int i = 1; i <= n; i++) {
-            adj[i] = new ArrayList<>();
-
-            int[] neighbor = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-            for (int j = 1; j <= neighbor[0]; j++) adj[i].add(neighbor[j]);
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < n; i++) {
+            populations.put(1 << i, Integer.parseInt(st.nextToken()));
         }
+
+        adj = new List[1 << n];
+        for (int i = 0; i < n; i++) adj[1 << i] = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            st = new StringTokenizer(br.readLine());
+
+            int k = Integer.parseInt(st.nextToken());
+
+            for (int j = 0; j < k; j++) adj[1 << i].add(1 << (Integer.parseInt(st.nextToken()) - 1));
+        }
+
+        int m = (1 << n) / 2;
 
         int min = 1000;
 
-        boolean pos = false;
-
-        for (int i = 1; i < Math.pow(2, n - 1); i++) {
-            int j = (int) Math.pow(2, n) - i - 1;
-
-            int a = isConnected(toArray(i));
-            int b = isConnected(toArray(j));
-
-            if (a > 0 && b > 0) {
-                pos = true;
-
-                if (a > b) min = Math.min(min, a - b);
-                else min = Math.min(min, b - a);
-            }
+        for (int i = 1; i < m; i++) {
+            min = Math.min(min, findDif(i));
         }
 
-        if (pos) System.out.println(min);
+        if (min < 1000) System.out.println(min);
         else System.out.println(-1);
     }
 
-    static boolean[] toArray(int m) {
+    static int findDif(int m) {
 
-        boolean[] result = new boolean[n];
+        int left = (1 << n) - 1 - m;
 
-        int i = 0;
 
-        while (m > 0) {
-            if (m % 2 == 1) result[i++] = true;
-            else i++;
+        int a = isConnected(m);
+        int b = isConnected(left);
 
-            m /= 2;
+        if (Math.abs(a - b) == 2) {
+            System.out.println(m);
+            System.out.println(left);
         }
 
-        return result;
+        if (a > -1 && b > -1) return Math.abs(a - b);
+        else return 1000;
     }
 
-    static int isConnected(boolean[] sector) {
+    static int isConnected(int m) {
 
-        boolean[] v = new boolean[n];
-        for (int i = 0; i < n; i++) v[i] = sector[i];
+        Queue<Integer> q = new ArrayDeque<>();
+        q.add(m & -m);
 
-        Queue<Integer> q = new LinkedList<>();
-
-        int s = 0;
-
-        for (int i = 0; i < n; i++) {
-            if (v[i]) {
-                s = i + 1;
-                break;
-            }
-        }
-
-        q.add(s);
-        v[s - 1] = false;
-
-        int sum = 0;
+        int sum = populations.get(m & -m);
+        m -= m & -m;
 
         while (!q.isEmpty()) {
             int now = q.poll();
 
-            sum += populations[now - 1];
-
             for (int next : adj[now]) {
-                if (v[next - 1]) {
+                if ((m & next) > 0) {
+                    m -= next;
                     q.add(next);
-                    v[next - 1] = false;
+                    sum += populations.get(next);
                 }
             }
         }
 
-        for (boolean b : v) {
-            if (b) return 0;
-        }
-
-        return sum;
+        if (m > 0) return -1;
+        else return sum;
     }
 }
