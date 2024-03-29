@@ -13,6 +13,7 @@ public class 스도쿠_2239 {
     static int[][] sudoku = new int[9][9];
     static List<int[]> zeros = new ArrayList<>();
     static int l;
+    static int[] num = new int[513];
 
     public static void main(String[] args) throws IOException {
 
@@ -37,6 +38,10 @@ public class 스도쿠_2239 {
 
         l = zeros.size();
 
+        for (int i = 0; i < 9; i++) {
+            num[1 << i] = i;
+        }
+
         dfs(0);
 
         for (int i = 0; i < 9; i++) {
@@ -59,14 +64,11 @@ public class 스도쿠_2239 {
 
         int able = ((1 << 9) - 1) & ~(row[r] | col[c] | sec[r / 3][c / 3]);
 
-        int i = 0;
-
         while (able > 0) {
             int p = able & -able;
             able -= p;
 
-            while (p > (1 << i)) i++;
-            sudoku[r][c] = i;
+            sudoku[r][c] = num[p];
 
             row[r] |= p;
             col[c] |= p;
