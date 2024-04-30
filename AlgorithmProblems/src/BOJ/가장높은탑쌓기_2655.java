@@ -14,77 +14,51 @@ public class 가장높은탑쌓기_2655 {
 
         int n = Integer.parseInt(br.readLine());
 
-        int[][] boxes = new int[n][4];
+        int[][] blocks = new int[n][4];
 
         for (int i = 0; i < n; i++) {
             st = new StringTokenizer(br.readLine());
 
-            for (int j = 0; j < 3; j++) boxes[i][j] = Integer.parseInt(st.nextToken());
-            boxes[i][3] = i;
+            blocks[i][0] = i;
+
+            for (int j = 1; j < 4; j++) {
+                blocks[i][j] = Integer.parseInt(st.nextToken());
+            }
         }
 
-        Arrays.sort(boxes, Comparator.comparingInt(b -> b[2]));
+        Arrays.sort(blocks, Comparator.comparingInt(a -> -a[3]));
 
-        Map<Integer, Data> map = new HashMap<>();
-        map.put(0,  new Data(0));
+        TreeSet<int[]> set = new TreeSet<>((a, b) ->  {
+            if (a[2] == b[2]) return a[0] - b[0];
+            return b[2] - a[2];
+        });
+
+        int[] before = new int[n];
+
+        set.add(new int[]{-1, 10001, 0, 0});
 
         for (int i = 0; i < n; i++) {
-            int[] box = boxes[i];
+            for (int[] top : set) {
+                if (top[1] > blocks[i][1]) {
+                    set.add(new int[]{blocks[i][0], blocks[i][1], top[2] + blocks[i][2], top[3] + 1});
 
-            int max = 0;
-            int mKey = 0;
-
-            for (int key : map.keySet()) {
-                if (key > box[0]) continue;
-
-
-                if (map.get(key).height > max) {
-                    max = map.get(key).height;
-                    mKey = key;
+                    before[blocks[i][0]] = top[0];
+                    break;
                 }
             }
-
-            Data d = map.get(mKey);
-
-            Data nd = new Data(d.height + box[1], d.history);
-            nd.history.add(box[3]);
-
-            map.put(box[0], nd);
         }
 
-        int max = 0;
-        int mKey = 0;
+        int[] last = set.first();
+        sb.append(last[3]).append("\n");
 
-        for (int key : map.keySet()) {
-            if (map.get(key).height > max) {
-                max = map.get(key).height;
-                mKey = key;
-            }
-        }
+        int idx = last[0];
 
-        List<Integer> maxList = map.get(mKey).history;
 
-        sb.append(maxList.size()).append("\n");
-
-        for (int i = 0; i < maxList.size(); i++) {
-            sb.append(maxList.get(i) + 1).append("\n");
+        while (idx >= 0) {
+            sb.append(idx + 1).append("\n");
+            idx = before[idx];
         }
 
         System.out.println(sb);
-
-    }
-
-    static class Data {
-        int height;
-        List<Integer> history = new ArrayList<>();
-
-        public Data(int height, List<Integer> history) {
-            this.height = height;
-            this.history.addAll(history);
-        }
-
-        public Data(int height) {
-            this.height = height;
-        }
     }
 }
