@@ -1,3 +1,5 @@
+package BOJ;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -5,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-public class 트리나라_12995 {
-    static int n, k;
+public class 트리의가중치_1289 {
+    static int n;
     static int d = 1000000007;
-    static List<Integer>[] adj;
-    static long[][] tree;
+    static int half = 500000004;
+    static List<int[]>[] adj;
     static boolean[] v;
     static long ans;
 
@@ -17,55 +19,54 @@ public class 트리나라_12995 {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        n = Integer.parseInt(st.nextToken());
-        k = Integer.parseInt(st.nextToken());
-
+        n = Integer.parseInt(br.readLine());
         adj = new List[n];
         for (int i = 0; i < n; i++) adj[i] = new ArrayList<>();
+
+        StringTokenizer st;
 
         for (int i = 0; i < n - 1; i++) {
             st = new StringTokenizer(br.readLine());
             int a = Integer.parseInt(st.nextToken()) - 1;
             int b = Integer.parseInt(st.nextToken()) - 1;
+            int w = Integer.parseInt(st.nextToken());
 
-            adj[a].add(b);
-            adj[b].add(a);
+            adj[a].add(new int[]{b, w});
+            adj[b].add(new int[]{a, w});
         }
-
-        tree = new long[n][k];
-        for (int i = 0; i < n; i++) tree[i][0] = 1;
 
         v = new boolean[n];
         ans = 0;
 
         count(0);
 
+        ans = (ans + d) % d;
+
         System.out.println(ans);
     }
 
-    static void count(int idx) {
+    static long count(int idx) {
 
         v[idx] = true;
 
-        for (int c : adj[idx]) {
-            if (v[c]) continue;
+        long res = 0;
+        long square = 0;
 
-            count(c);
+        for (int[] child : adj[idx]) {
+            if (v[child[0]]) continue;
 
-            long[] tmp = tree[idx].clone();
+            long sum = child[1] * (1 + count(child[0])) % d;
 
-            for (int i = 1; i < k; i++) {
-                for (int j = 0; j < i; j++) {
-                    tmp[i] += tree[idx][j] * tree[c][i - j - 1];
-                    tmp[i] %= d;
-                }
-            }
+            res += sum;
+            res %= d;
 
-            tree[idx] = tmp;
+            square += sum * sum;
+            square %= d;
         }
 
-        ans += tree[idx][k - 1];
+        ans += (res * res - square) % d * half + res;
         ans %= d;
+
+        return res;
     }
 }
