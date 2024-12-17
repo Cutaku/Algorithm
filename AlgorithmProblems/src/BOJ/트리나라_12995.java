@@ -11,7 +11,6 @@ public class 트리나라_12995 {
     static int n, k;
     static int d = 1000000007;
     static List<Integer>[] adj;
-    static long[][] tree;
     static boolean[] v;
     static long ans;
 
@@ -35,9 +34,6 @@ public class 트리나라_12995 {
             adj[b].add(a);
         }
 
-        tree = new long[n][k];
-        for (int i = 0; i < n; i++) tree[i][0] = 1;
-
         v = new boolean[n];
         ans = 0;
 
@@ -46,28 +42,29 @@ public class 트리나라_12995 {
         System.out.println(ans);
     }
 
-    static void count(int idx) {
+    static long[] count(int idx) {
 
         v[idx] = true;
+
+        long[] res = new long[k];
+        res[0] = 1;
 
         for (int c : adj[idx]) {
             if (v[c]) continue;
 
-            count(c);
+            long[] dp = count(c);
 
-            long[] tmp = tree[idx].clone();
-
-            for (int i = 1; i < k; i++) {
+            for (int i = k - 1; i > 0; i--) {
                 for (int j = 0; j < i; j++) {
-                    tmp[i] += tree[idx][j] * tree[c][i - j - 1];
-                    tmp[i] %= d;
+                    res[i] += res[j] * dp[i - j - 1];
+                    res[i] %= d;
                 }
             }
-
-            tree[idx] = tmp;
         }
 
-        ans += tree[idx][k - 1];
+        ans += res[k - 1];
         ans %= d;
+
+        return res;
     }
 }
