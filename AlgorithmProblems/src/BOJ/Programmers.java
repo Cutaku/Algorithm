@@ -1,3 +1,5 @@
+package BOJ;
+
 class Programmers {
     public static void main(String[] args) {
 
